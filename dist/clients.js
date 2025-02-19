@@ -13,26 +13,34 @@ exports.createClient = createClient;
 exports.deleteClient = deleteClient;
 exports.getClients = getClients;
 exports.updateClients = updateClients;
+const conn_1 = require("./conn");
 let clients = [];
 function clientExists(cedula) {
     return __awaiter(this, void 0, void 0, function* () {
-        return clients.some(client => client.id === cedula);
+        let exists = false;
+        yield (0, conn_1.useDatabase)((client) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield client.query('SELECT 1 FROM clients WHERE id = $1', [cedula]);
+            exists = res.rowCount > 0;
+        }));
+        return exists;
     });
 }
 function getClients() {
     return __awaiter(this, void 0, void 0, function* () {
+        yield (0, conn_1.useDatabase)((client) => __awaiter(this, void 0, void 0, function* () {
+            const res = yield client.query('SELECT id, name FROM clients');
+            clients = res.rows;
+        }));
         return clients;
     });
 }
 function createClient(cedula, nombre) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!(yield clientExists(cedula))) {
-            let client = {
-                id: cedula,
-                name: nombre
-            };
-            clients.push(client);
-            return { success: true, clients: clients };
+            yield (0, conn_1.useDatabase)((client) => __awaiter(this, void 0, void 0, function* () {
+                yield client.query('INSERT INTO clients (id, name) VALUES ($1, $2)', [cedula, nombre]);
+            }));
+            return { success: true, clients: yield getClients() };
         }
         return { success: false, message: "Client already exists" };
     });
@@ -40,8 +48,10 @@ function createClient(cedula, nombre) {
 function deleteClient(cedula) {
     return __awaiter(this, void 0, void 0, function* () {
         if (yield clientExists(cedula)) {
-            clients = clients.filter(client => client.id !== cedula);
-            return { success: true, clients: clients };
+            yield (0, conn_1.useDatabase)((client) => __awaiter(this, void 0, void 0, function* () {
+                yield client.query('DELETE FROM clients WHERE id = $1', [cedula]);
+            }));
+            return { success: true, clients: yield getClients() };
         }
         return { success: false, message: "Client doesn't exist." };
     });
@@ -49,13 +59,10 @@ function deleteClient(cedula) {
 function updateClients(cedula, nombre) {
     return __awaiter(this, void 0, void 0, function* () {
         if (yield clientExists(cedula)) {
-            clients = clients.map(client => {
-                if (client.id === cedula) {
-                    client.name = nombre;
-                }
-                return client;
-            });
-            return { success: true, clients: clients };
+            yield (0, conn_1.useDatabase)((client) => __awaiter(this, void 0, void 0, function* () {
+                yield client.query('UPDATE clients SET name = $1 WHERE id = $2', [nombre, cedula]);
+            }));
+            return { success: true, clients: yield getClients() };
         }
         return { success: false, message: "Client doesn't exist" };
     });
