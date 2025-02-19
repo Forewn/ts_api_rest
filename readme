@@ -1,0 +1,34 @@
+# TS Prueba
+
+This project is a TypeScript practice project. It is intended to help users get familiar with TypeScript and its features.
+
+## Getting Started
+
+To get started with this project, Node.js and TypeScript need to be installed on the machine.
+
+### Prerequisites
+
+- Node.js
+- TypeScript
+
+### Installation
+
+1. Clone the repository:
+    ```sh
+    git clone <repository-url>
+    ```
+2. Navigate to the project directory:
+    ```sh
+    cd ts-prueba
+    ```
+3. Install the dependencies:
+    ```sh
+    npm install
+    ```
+
+### Running the Project
+
+To run the project, use the following command:
+    ```sh
+    npm start
+    ```
